@@ -1,8 +1,8 @@
 {
   "name": "vsnocode-discord-rpc",
   "displayName": "VSNoCode-discord-rpc",
-  "description": "Basic Discord Rich Presence integration for VS Code",
-  "version": "0.0.1",
+  "description": "Extremely Simple Discord Rich Presence integration for VS Code",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -13,7 +13,6 @@
     "*"
   ],
   "main": "./out/extension.js",
-  "extensionDependencies": [],
   "contributes": {
     "configuration": {
       "title": "VSNoCode Discord RPC",
@@ -81,20 +80,12 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
     "@types/discord-rpc": "^4.0.9",
-    "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.100.0",
-    "@typescript-eslint/eslint-plugin": "^8.31.1",
-    "@typescript-eslint/parser": "^8.31.1",
-    "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.5.2",
     "discord-rpc": "^4.0.1",
     "eslint": "^9.25.1",
     "typescript": "^5.8.3"
@@ -103,5 +94,12 @@
     "type": "git",
     "url": "https://github.com/ka-iden/vsnocode-discord-rpc.git"
   },
-  "publisher": "ka-iden"
+  "publisher": "ka-iden",
+  "icon": "icon.png",
+  "readme": "README.md",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ka-iden/vsnocode-discord-rpc/issues"
+  },
+  "homepage": "https://github.com/ka-iden/vsnocode-discord-rpc"
 }
