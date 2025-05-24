@@ -2,76 +2,100 @@ import * as vscode from 'vscode';
 import * as DiscordRPC from 'discord-rpc';
 import * as path from 'path';
 
-const clientId = '1375810382735740978';
-const rpc      = new DiscordRPC.Client({ transport: 'ipc' });
-let startTime  = Date.now();
+// Discord RPC client instance (IPC transport for local Discord)
+const rpc = new DiscordRPC.Client({ transport: 'ipc' });
 
+// Tracks the start time for the current session/timer
+let startTime = Date.now();
+
+// Types for extension settings/options
 type IconOption    = 'none' | 'vscodeVersion' | 'fileExtension';
 type DetailsOption = 'empty' | 'fileName' | 'folderName' | 'vscodeVersion';
 type TimerMode     = 'disabled' | 'withinFiles' | 'withinFolder';
 
+// Maps icon options to Discord asset keys (see README for asset setup)
 const iconMap: Record<IconOption, string> = {
   none: 'none',
   vscodeVersion: 'vscode',
-  fileExtension: '' // handled dynamically below
+  fileExtension: '' // handled dynamically in pickIcon
 };
 
+// Helper to get extension config with a default value
 function getConfig<T>(key: string, def: T): T {
   return vscode.workspace.getConfiguration('vsnocodeDiscordRPC').get<T>(key, def);
 }
 
+// Get the Discord Application Client ID from settings, or use mine
+// Technically safe to keep here? Cuz it's not the secret or some sort of bot token
+// and it doesn't change. Others should be able to use the extension without having
+// to set up anything themselves.
+function getClientId(): string {
+  const configured = vscode.workspace.getConfiguration('vsnocodeDiscordRPC').get<string>('clientId', '');
+  // Default clientId is for the public extension; use your own for custom branding
+  return configured && configured.trim() !== '' ? configured : '1375810382735740978';
+}
+
+// Main function to update Discord Rich Presence
 async function setActivity() {
   if (!rpc) return;
 
+  // Get user settings for icons and status lines
   const largeOpt = getConfig<IconOption>('largeIcon', 'vscodeVersion');
   const smallOpt = getConfig<IconOption>('smallIcon', 'none');
   const topOpt   = getConfig<DetailsOption>('topLineText', 'folderName');
   const botOpt   = getConfig<DetailsOption>('bottomLineText', 'fileName');
 
-  const editor   = vscode.window.activeTextEditor;
-  const fileName = editor ? path.basename(editor.document.fileName) : 'No File';
-  const fileExt  = editor ? path.extname(editor.document.fileName).replace('.', '').toLowerCase() : '';
-  const folder   = vscode.workspace.workspaceFolders?.[0]?.name || 'No Folder';
-  const vsVersion= vscode.version;
+  // Gather current VS Code context
+  const editor    = vscode.window.activeTextEditor;
+  const fileName  = editor ? path.basename(editor.document.fileName) : 'No File';
+  const fileExt   = editor ? path.extname(editor.document.fileName).replace('.', '').toLowerCase() : '';
+  const folder    = vscode.workspace.workspaceFolders?.[0]?.name || 'No Folder';
+  const vsVersion = vscode.version;
 
-  const detailsMap: Record<DetailsOption,string> = {
+  // Map for details options (top/bottom lines)
+  const detailsMap: Record<DetailsOption, string> = {
     empty: '',
     fileName,
     folderName: folder,
     vscodeVersion: vsVersion
   };
 
-  const prefixMap: Record<DetailsOption,string> = {
+  // Prefixes for each details option
+  const prefixMap: Record<DetailsOption, string> = {
     empty: '',
     fileName:      'File ',
     folderName:    'Folder ',
     vscodeVersion: 'VSCode Version '
   };
 
-  function applyPrefix(opt: DetailsOption, raw?: string): string|undefined {
+  // Helper to add prefix unless it's a "No ..." placeholder
+  function applyPrefix(opt: DetailsOption, raw?: string): string | undefined {
     if (!raw) return undefined;
     if (raw.startsWith('No ')) return raw;
     return prefixMap[opt] + raw;
   }
 
+  // Prepare top and bottom lines for Discord status
   const topRaw     = topOpt === 'empty' ? undefined : detailsMap[topOpt];
   const botRaw     = botOpt === 'empty' ? undefined : detailsMap[botOpt];
   const topLine    = applyPrefix(topOpt, topRaw);
   const bottomLine = applyPrefix(botOpt, botRaw);
 
-  // Icon logic
+  // Returns the Discord asset key for the icon option
   function pickIcon(opt: IconOption): string | undefined {
     if (opt === 'fileExtension') {
+      // Use the file extension as the asset key (must match an uploaded asset)
       return fileExt || undefined;
     }
     if (opt === 'vscodeVersion') {
+      // Use the VS Code logo asset
       return 'vscode';
     }
     return iconMap[opt] || undefined;
   }
 
-  // Image meta text logic
-  let largeImageText: string | undefined = undefined;
+  // These appear as tooltips when hovering the icons in Discord
+  let largeImageText: string | undefined = 'Visual Studio Code';
   if (largeOpt === 'fileExtension' && fileExt) {
     largeImageText = `.${fileExt} file`;
   } else if (largeOpt === 'vscodeVersion') {
@@ -85,6 +109,7 @@ async function setActivity() {
     smallImageText = `VSCode ${vsVersion}`;
   }
 
+  // This is what gets sent to Discord for your Rich Presence
   const activity: DiscordRPC.Presence = {
     details:        topLine,
     state:          bottomLine,
@@ -96,20 +121,22 @@ async function setActivity() {
     instance: false
   };
 
-  // catch any rejection from setActivity to avoid unhandled promise
+  // Set Discord activity, safely handle errors
   try {
     await rpc.setActivity(activity);
   } catch (err) {
-    // Safe error logging - only use the message
+    // Only log the error message to avoid circular structure issues
     console.warn(`Discord RPC setActivity error (ignored): ${err}`);
   }
 }
 
+// Handles connecting and reconnecting to Discord RPC
 function connectRpc() {
   let reconnectAttempts = 0;
   const maxRetryDelay = 30000; // 30 seconds max
 
   function attemptConnect() {
+    const clientId = getClientId();
     rpc.login({ clientId })
       .then(() => {
         reconnectAttempts = 0;
@@ -123,21 +150,21 @@ function connectRpc() {
         setTimeout(attemptConnect, delay);
       });
   }
-  
   attemptConnect();
 }
 
-// Add at the top, after your imports
+// Timer mode logic: controls when the session timer resets
 let disposables: vscode.Disposable[] = [];
 
 function setupTimerMode(context: vscode.ExtensionContext) {
-  // Dispose old listeners
+  // Dispose old listeners to avoid duplicates
   disposables.forEach(d => d.dispose());
   disposables = [];
 
   const mode = getConfig<TimerMode>('timerMode', 'withinFolder');
 
   if (mode === 'withinFiles') {
+    // Reset timer when switching files
     let lastFile: string | undefined = vscode.window.activeTextEditor?.document.fileName;
 
     const resetIfChanged = () => {
@@ -157,6 +184,7 @@ function setupTimerMode(context: vscode.ExtensionContext) {
   }
 
   if (mode === 'withinFolder') {
+    // Reset timer when changing workspace folders
     startTime = Date.now();
     context.globalState.update('startTime', startTime);
     setActivity();
@@ -171,20 +199,21 @@ function setupTimerMode(context: vscode.ExtensionContext) {
   }
 }
 
-// ─── ACTIVATE ─────────────────────────────────────────────────────────────────
+// Extension activation: sets up everything on startup
 export function activate(context: vscode.ExtensionContext) {
   setupTimerMode(context);
 
-  // Listen for timerMode config changes
+  // Listen for timerMode config changes and re-setup listeners
   vscode.workspace.onDidChangeConfiguration(e => {
     if (e.affectsConfiguration('vsnocodeDiscordRPC.timerMode')) {
       setupTimerMode(context);
     }
   }, null, context.subscriptions);
 
+  // Discord RPC event handlers
   rpc.on('ready', () => {
     setActivity();
-    setInterval(setActivity, 5_000);
+    setInterval(setActivity, 5_000); // Update every 5 seconds
     console.log('Discord RPC armed');
   });
 
@@ -201,7 +230,7 @@ export function activate(context: vscode.ExtensionContext) {
   connectRpc();
 }
 
-// ─── DEACTIVATE ───────────────────────────────────────────────────────────────
+// Extension deactivation: clean up Discord RPC connection
 export function deactivate() {
   rpc.destroy();
 }

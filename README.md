@@ -1,71 +1,75 @@
-# vsnocode-discord-rpc README
+# VSNoCode Discord RPC
 
-This is the README for your extension "vsnocode-discord-rpc". After writing up a brief description, we recommend including the following sections.
+An extremely simple, customizable Discord Rich Presence integration for Visual Studio Code. This extension was created by my petty ass to try and fill a gap I saw in the marketplace for something pretty niche.
+
+I made this extension after being frustrated with how overly complex some of the other Discord RPC extensions were. I wanted something as close as visually possible to this [Discord RPC client for Visual Studio by Reavert] as possible, as Visual Studio is my other preferred editor of choice.
+
+This is also why it is named such, as weird as the name is. It's VS (No) Code, because I wanted a relative amount of parity with the extension I use on Visual Studio.
+
+> [!NOTE]
+> I didn't use many icons, if there are icons you want used that are not included, feel free to make a pull request or open an issue.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Shows your current file, folder, or VS Code version in your Discord status.
+- Customizable top and bottom lines (choose file name, folder name, or VS Code version).
+- Customizable large and small icons:
+  - Show the VS Code logo, file extension icon, or nothing.
+  - Hovering over the icon shows the file extension or VS Code version.
+- Timer resets based on your chosen mode (file or folder changes).
+- Handles Discord restarts and reconnects automatically.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+| Setting                             | Description                       | Options                                            | Default              |
+|-------------------------------------|-----------------------------------|----------------------------------------------------|----------------------|
+| `vsnocodeDiscordRPC.largeIcon`      | What to show as the large icon    | `none`, `vscodeVersion`, `fileExtension`           | `vscodeVersion`      |
+| `vsnocodeDiscordRPC.smallIcon`      | What to show as the small icon    | `none`, `vscodeVersion`, `fileExtension`           | `none`               |
+| `vsnocodeDiscordRPC.topLineText`    | What to render in the top line    | `empty`, `fileName`, `folderName`, `vscodeVersion` | `folderName`         |
+| `vsnocodeDiscordRPC.bottomLineText` | What to render in the bottom line | `empty`, `fileName`, `folderName`, `vscodeVersion` | `fileName`           |
+| `vsnocodeDiscordRPC.timerMode`      | When to reset the start timer     | `disabled`, `withinFiles`, `withinFolder`          | `withinFolder`       |
+| `vsnocodeDiscordRPC.clientId`       | Discord application Client ID     | Your or my Discord Application Client ID           | `123456789012345678` |
 
-## Known Issues
+## How to Recreate the Extension (Discord Application)
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+So the name of the program that shows up after "Playing ..." in Discord is set by the Discord application. If you want to set it to something different, for example cursor, you unfortunately need to recreate this extension with your own Discord application, and to do so, I will explain what I did to set this all up.
 
-## Release Notes
+I stole the [VS Code logo from Wikipedia], as it was the first result on google images.
 
-Users appreciate release notes as you update your extension.
+I took most of the icons from [vscode-icons] and made a few of my own. Note that these are all svgs, so they need to be converted, and I again used the first result on google, [PineTools]. I only used a few of the icons, if there is an icon you want to use that is not included, feel free to make a pull request or open an issue- but remember, they need to be uploaded to the Discord Developer Portal, the [icons folder] is just for reference.
 
-### 1.0.0
+1. Go to the [Discord Developer Portal] and create a new application.
+2. Go to the "Rich Presence" > "Art Assets" section.
+3. Upload your icons:
+   - One thing to mention is that Discord will rate limit you if you upload more than 10 assets at once, so I recommend uploading them in batches of 10 or less.
+   - For the VS Code logo, upload an image named **`vscode`** (case-sensitive, no extension).
+   - For file extensions, upload images named after the extension (e.g., `js`, `ts`, `py`).
+   - For "none", upload a transparent image named **`none`**.
+4. Copy your application's **Client ID** and replace the `clientId` in the extension settings with your own.
 
-Initial release of ...
+## Notes
 
-### 1.0.1
+- If your icons do not appear, double-check the asset names in the Discord Developer Portal. They must match exactly (case-sensitive, no file extension).
+- The extension will attempt to reconnect automatically if Discord is restarted.
+- Timer resets are based on your selected mode:
+  - **withinFiles**: Resets when you switch, open, or close files.
+  - **withinFolder**: Resets when you change workspace folders.
 
-Fixed issue #.
+## License
 
-### 1.1.0
+This project is licensed under the [MIT License][LICENSE].
+VS Code is a trademark of Microsoft Corporation. This extension is not affiliated with or endorsed by Microsoft. VS Code itself is licensed under the [MIT License][vscode-license].
+vscode-icons is licensed under the [MIT License][vscode-icons-license]
 
-Added features X, Y, and Z.
+[Discord RPC client for Visual Studio by Reavert]: https://marketplace.visualstudio.com/items?itemName=Ryavel.vsdrp2022
+[VS Code logo from Wikipedia]: https://en.m.wikipedia.org/wiki/File:Visual_Studio_Code_1.35_icon.svg
+[vscode-icons]: https://github.com/vscode-icons/vscode-icons/tree/master/icons
+[PineTools]: https://pinetools.com/bulk-batch-svg-converter-viewer
+[icons folder]: icons/
+[Discord Developer Portal]: https://discord.com/developers/applications
 
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+[LICENSE]: LICENSE
+[vscode-license]: https://github.com/microsoft/vscode/blob/main/LICENSE.txt
+[vscode-icons-license]: https://github.com/vscode-icons/vscode-icons/blob/master/LICENSE

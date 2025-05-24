@@ -69,6 +69,11 @@
           ],
           "default": "withinFolder",
           "description": "When to reset the start timer"
+        },
+        "vsnocodeDiscordRPC.clientId": {
+          "type": "string",
+          "default": "1375810382735740978",
+          "description": "Discord Application Client ID. Leave blank to use the built-in default."
         }
       }
     }
