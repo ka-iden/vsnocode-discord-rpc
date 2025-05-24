@@ -9,5 +9,5 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
-icons/
+images/
 vsnocode-discord-rpc-*.vsix
