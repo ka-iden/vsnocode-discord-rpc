@@ -1,7 +1,7 @@
 {
   "name": "vsnocode-discord-rpc",
-  "displayName": "vsnocode-discord-rpc",
-  "description": "",
+  "displayName": "VSNoCode-discord-rpc",
+  "description": "Basic Discord Rich Presence integration for VS Code",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.100.0"
@@ -9,15 +9,67 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./out/extension.js",
+  "extensionDependencies": [],
   "contributes": {
-    "commands": [
-      {
-        "command": "vsnocode-discord-rpc.helloWorld",
-        "title": "Hello World"
+    "configuration": {
+      "title": "VSNoCode Discord RPC",
+      "properties": {
+        "vsnocodeDiscordRPC.largeIcon": {
+          "type": "string",
+          "enum": [
+            "none",
+            "vscodeVersion"
+          ],
+          "default": "vscodeVersion",
+          "description": "What to show as the large icon"
+        },
+        "vsnocodeDiscordRPC.smallIcon": {
+          "type": "string",
+          "enum": [
+            "none",
+            "vscodeVersion"
+          ],
+          "default": "none",
+          "description": "What to show as the small icon"
+        },
+        "vsnocodeDiscordRPC.topLineText": {
+          "type": "string",
+          "enum": [
+            "empty",
+            "fileName",
+            "folderName",
+            "vscodeVersion"
+          ],
+          "default": "folderName",
+          "description": "What to render in the top line"
+        },
+        "vsnocodeDiscordRPC.bottomLineText": {
+          "type": "string",
+          "enum": [
+            "empty",
+            "fileName",
+            "folderName",
+            "vscodeVersion"
+          ],
+          "default": "fileName",
+          "description": "What to render in the bottom line"
+        },
+        "vsnocodeDiscordRPC.timerMode": {
+          "type": "string",
+          "enum": [
+            "disabled",
+            "withinFiles",
+            "withinFolder"
+          ],
+          "default": "withinFolder",
+          "description": "When to reset the start timer"
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -28,14 +80,16 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.100.0",
+    "@types/discord-rpc": "^4.0.9",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "@types/vscode": "^1.100.0",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
-    "eslint": "^9.25.1",
-    "typescript": "^5.8.3",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "discord-rpc": "^4.0.1",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3"
   }
 }
