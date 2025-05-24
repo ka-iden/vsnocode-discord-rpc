@@ -11,7 +11,7 @@ type DetailsOption = 'empty' | 'fileName' | 'folderName' | 'vscodeVersion';
 type TimerMode     = 'disabled' | 'withinFiles' | 'withinFolder';
 
 const iconMap: Record<IconOption, string> = {
-  none: '',
+  none: 'none',
   vscodeVersion: 'vscode',
   fileExtension: '' // handled dynamically below
 };
@@ -64,7 +64,25 @@ async function setActivity() {
     if (opt === 'fileExtension') {
       return fileExt || undefined;
     }
+    if (opt === 'vscodeVersion') {
+      return 'vscode';
+    }
     return iconMap[opt] || undefined;
+  }
+
+  // Image meta text logic
+  let largeImageText: string | undefined = undefined;
+  if (largeOpt === 'fileExtension' && fileExt) {
+    largeImageText = `.${fileExt} file`;
+  } else if (largeOpt === 'vscodeVersion') {
+    largeImageText = `VSCode ${vsVersion}`;
+  }
+
+  let smallImageText: string | undefined = undefined;
+  if (smallOpt === 'fileExtension' && fileExt) {
+    smallImageText = `.${fileExt} file`;
+  } else if (smallOpt === 'vscodeVersion') {
+    smallImageText = `VSCode ${vsVersion}`;
   }
 
   const activity: DiscordRPC.Presence = {
@@ -73,18 +91,8 @@ async function setActivity() {
     startTimestamp: startTime,
     largeImageKey:  pickIcon(largeOpt),
     smallImageKey:  pickIcon(smallOpt),
-    largeImageText:
-      largeOpt === 'fileExtension' && fileExt
-        ? `.${fileExt} file`
-        : largeOpt === 'vscodeVersion'
-          ? `VSCode ${vsVersion}`
-          : 'Visual Studio Code',
-    smallImageText:
-      smallOpt === 'fileExtension' && fileExt
-        ? `.${fileExt} file`
-        : smallOpt === 'vscodeVersion'
-          ? `VSCode ${vsVersion}`
-          : undefined,
+    largeImageText,
+    smallImageText,
     instance: false
   };
 
