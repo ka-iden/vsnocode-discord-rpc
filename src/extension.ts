@@ -6,13 +6,14 @@ const clientId = '1375810382735740978';
 const rpc      = new DiscordRPC.Client({ transport: 'ipc' });
 let startTime  = Date.now();
 
-type IconOption    = 'none' | 'vscodeVersion';
+type IconOption    = 'none' | 'vscodeVersion' | 'fileExtension';
 type DetailsOption = 'empty' | 'fileName' | 'folderName' | 'vscodeVersion';
 type TimerMode     = 'disabled' | 'withinFiles' | 'withinFolder';
 
 const iconMap: Record<IconOption, string> = {
   none: '',
-  vscodeVersion: 'vscode'
+  vscodeVersion: 'vscode',
+  fileExtension: '' // handled dynamically below
 };
 
 function getConfig<T>(key: string, def: T): T {
@@ -22,13 +23,14 @@ function getConfig<T>(key: string, def: T): T {
 async function setActivity() {
   if (!rpc) return;
 
-  const largeOpt = getConfig<IconOption>('largeIcon','vscodeVersion');
-  const smallOpt = getConfig<IconOption>('smallIcon','none');
-  const topOpt   = getConfig<DetailsOption>('topLineText','folderName');
-  const botOpt   = getConfig<DetailsOption>('bottomLineText','fileName');
+  const largeOpt = getConfig<IconOption>('largeIcon', 'vscodeVersion');
+  const smallOpt = getConfig<IconOption>('smallIcon', 'none');
+  const topOpt   = getConfig<DetailsOption>('topLineText', 'folderName');
+  const botOpt   = getConfig<DetailsOption>('bottomLineText', 'fileName');
 
   const editor   = vscode.window.activeTextEditor;
   const fileName = editor ? path.basename(editor.document.fileName) : 'No File';
+  const fileExt  = editor ? path.extname(editor.document.fileName).replace('.', '').toLowerCase() : '';
   const folder   = vscode.workspace.workspaceFolders?.[0]?.name || 'No Folder';
   const vsVersion= vscode.version;
 
@@ -57,14 +59,33 @@ async function setActivity() {
   const topLine    = applyPrefix(topOpt, topRaw);
   const bottomLine = applyPrefix(botOpt, botRaw);
 
+  // Icon logic
+  function pickIcon(opt: IconOption): string | undefined {
+    if (opt === 'fileExtension') {
+      return fileExt || undefined;
+    }
+    return iconMap[opt] || undefined;
+  }
+
   const activity: DiscordRPC.Presence = {
     details:        topLine,
     state:          bottomLine,
     startTimestamp: startTime,
-    largeImageKey:  iconMap[largeOpt] || undefined,
-    smallImageKey:  iconMap[smallOpt] || undefined,
-    largeImageText: 'Visual Studio Code',
-    instance:       false
+    largeImageKey:  pickIcon(largeOpt),
+    smallImageKey:  pickIcon(smallOpt),
+    largeImageText:
+      largeOpt === 'fileExtension' && fileExt
+        ? `.${fileExt} file`
+        : largeOpt === 'vscodeVersion'
+          ? `VSCode ${vsVersion}`
+          : 'Visual Studio Code',
+    smallImageText:
+      smallOpt === 'fileExtension' && fileExt
+        ? `.${fileExt} file`
+        : smallOpt === 'vscodeVersion'
+          ? `VSCode ${vsVersion}`
+          : undefined,
+    instance: false
   };
 
   // catch any rejection from setActivity to avoid unhandled promise

@@ -22,7 +22,8 @@
           "type": "string",
           "enum": [
             "none",
-            "vscodeVersion"
+            "vscodeVersion",
+            "fileExtension"
           ],
           "default": "vscodeVersion",
           "description": "What to show as the large icon"
@@ -31,7 +32,8 @@
           "type": "string",
           "enum": [
             "none",
-            "vscodeVersion"
+            "vscodeVersion",
+            "fileExtension"
           ],
           "default": "none",
           "description": "What to show as the small icon"
