@@ -107,6 +107,8 @@ async function setActivity() {
     smallImageText = `.${fileExt} file`;
   } else if (smallOpt === 'vscodeVersion') {
     smallImageText = `VSCode ${vsVersion}`;
+  } else if (smallOpt === 'none') {
+    smallImageText = undefined; // No invisible small icon, cuz overlap
   }
 
   // This is what gets sent to Discord for your Rich Presence
