@@ -60,7 +60,9 @@ I took most of the icons from [vscode-icons] and made a few of my own. Note that
 ## License
 
 This project is licensed under the [MIT License][LICENSE].
+
 VS Code is a trademark of Microsoft Corporation. This extension is not affiliated with or endorsed by Microsoft. VS Code itself is licensed under the [MIT License][vscode-license].
+
 vscode-icons is licensed under the [MIT License][vscode-icons-license]
 
 [Discord RPC client for Visual Studio by Reavert]: https://marketplace.visualstudio.com/items?itemName=Ryavel.vsdrp2022
