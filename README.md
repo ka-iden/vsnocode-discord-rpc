@@ -44,9 +44,9 @@ I took most of the icons from [vscode-icons] and made a few of my own. Note that
 2. Go to the "Rich Presence" > "Art Assets" section.
 3. Upload your icons:
    - One thing to mention is that Discord will rate limit you if you upload more than 10 assets at once, so I recommend uploading them in batches of 10 or less.
-   - For the VS Code logo, upload an image named **`vscode`** (case-sensitive, no extension).
+   - For the VS Code logo, upload an image named `vscode` (case-sensitive, no extension).
    - For file extensions, upload images named after the extension (e.g., `js`, `ts`, `py`).
-   - For "none", upload a transparent image named **`none`**.
+   - For "none", upload a transparent image named `none`.
 4. Copy your application's **Client ID** and replace the `clientId` in the extension settings with your own.
 
 ## Notes
