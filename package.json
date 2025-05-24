@@ -98,5 +98,10 @@
     "discord-rpc": "^4.0.1",
     "eslint": "^9.25.1",
     "typescript": "^5.8.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ka-iden/vsnocode-discord-rpc.git"
+  },
+  "publisher": "ka-iden"
 }
